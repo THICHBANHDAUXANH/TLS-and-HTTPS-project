@@ -1,29 +1,113 @@
+<!-- File: templates/dashboard.html -->
+
+<!-- Kế thừa layout từ base.html -->
 {% extends "base.html" %}
 
 {% block content %}
+
 <h2>Dashboard</h2>
 
-<p>Welcome to the Personal Finance Management System.</p>
+<!-- Hiển thị tên user đang login -->
+<p>
+    Welcome, <strong>{{ session.get("username") }}</strong>.
+</p>
 
+<!-- Hiển thị tháng/năm đang xem -->
+<p>
+    Financial summary for <strong>{{ month }}/{{ year }}</strong>
+</p>
+
+<!-- Dashboard cards -->
 <div class="cards">
+
+    <!-- Tổng thu nhập -->
     <div class="card">
         <h3>Total Income</h3>
-        <p>0 VND</p>
+        <p>{{ "{:,.0f}".format(total_income) }} VND</p>
     </div>
 
+    <!-- Tổng chi tiêu -->
     <div class="card">
         <h3>Total Expense</h3>
-        <p>0 VND</p>
+        <p>{{ "{:,.0f}".format(total_expense) }} VND</p>
     </div>
 
+    <!-- Tiết kiệm ròng -->
     <div class="card">
-        <h3>Savings</h3>
-        <p>0 VND</p>
+        <h3>Net Savings</h3>
+        <p>{{ "{:,.0f}".format(net_savings) }} VND</p>
     </div>
 
+    <!-- Tổng số dư tất cả account -->
     <div class="card">
         <h3>Total Balance</h3>
-        <p>0 VND</p>
+        <p>{{ "{:,.0f}".format(total_balance) }} VND</p>
     </div>
+
 </div>
+
+<!-- Budget alerts -->
+<h3>Budget Alerts</h3>
+
+{% if budget_alerts %}
+
+<table>
+    <thead>
+        <tr>
+            <th>Category</th>
+            <th>Budget</th>
+            <th>Actual Spent</th>
+            <th>Remaining</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for alert in budget_alerts %}
+        <tr>
+            <td>{{ alert.CategoryName }}</td>
+            <td>{{ "{:,.0f}".format(alert.LimitAmount) }} VND</td>
+            <td>{{ "{:,.0f}".format(alert.ActualSpent) }} VND</td>
+            <td>{{ "{:,.0f}".format(alert.RemainingAmount) }} VND</td>
+            <td>{{ alert.BudgetStatus }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% else %}
+
+<p>No budget warnings this month.</p>
+
+{% endif %}
+
+<!-- Recent transactions -->
+<h3>Recent Transactions</h3>
+
+<table>
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Type</th>
+            <th>Account</th>
+            <th>Category</th>
+            <th>Amount</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for transaction in recent_transactions %}
+        <tr>
+            <td>{{ transaction.TransactionDate }}</td>
+            <td>{{ transaction.TransactionType }}</td>
+            <td>{{ transaction.AccountName }}</td>
+            <td>{{ transaction.CategoryName }}</td>
+            <td>{{ "{:,.0f}".format(transaction.Amount) }} VND</td>
+            <td>{{ transaction.Description }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
 {% endblock %}

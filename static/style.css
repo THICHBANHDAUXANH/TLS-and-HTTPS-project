@@ -1,70 +1,60 @@
-/* File: static/style.css */
-
-body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    background-color: #f4f6f8;
-    color: #222;
+/* Flash messages: hiện thông báo từ Flask */
+.messages {
+    background-color: #e0f2fe;
+    color: #075985;
+    padding: 12px;
+    border-radius: 6px;
+    margin-bottom: 16px;
 }
 
-header {
-    background-color: #1f2937;
-    color: white;
-    padding: 20px;
-}
-
-header h1 {
-    margin: 0 0 10px 0;
-}
-
-nav a {
-    color: white;
-    margin-right: 16px;
-    text-decoration: none;
-}
-
-main {
-    padding: 24px;
-}
-
-form {
+/* Bảng dữ liệu trong dashboard */
+table {
+    width: 100%;
+    border-collapse: collapse;
     background: white;
-    padding: 20px;
-    width: 360px;
-    border-radius: 8px;
-}
-
-label {
-    display: block;
     margin-top: 12px;
+    margin-bottom: 24px;
 }
 
-input {
+/* Ô trong bảng */
+th, td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+}
+
+/* Header bảng */
+th {
+    background-color: #f1f5f9;
+}
+
+/* Dòng chẵn có màu nhẹ để dễ nhìn */
+tr:nth-child(even) {
+    background-color: #f9fafb;
+}
+
+/* Select box dùng cho account type/category */
+select {
     width: 100%;
     padding: 8px;
     margin-top: 4px;
 }
 
-button {
-    margin-top: 16px;
-    padding: 10px 16px;
-    background-color: #2563eb;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
+/* Form xóa nằm trong table, không cần background to như form chính */
+.inline-form {
+    background: none;
+    padding: 0;
+    width: auto;
+    border-radius: 0;
 }
 
-.cards {
-    display: flex;
-    gap: 16px;
-    flex-wrap: wrap;
+/* Button trong inline form */
+.inline-form button {
+    margin-top: 0;
+    background-color: #dc2626;
 }
 
-.card {
-    background: white;
-    padding: 20px;
-    width: 220px;
-    border-radius: 8px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+/* Button đỏ khi hover */
+.inline-form button:hover {
+    background-color: #b91c1c;
 }

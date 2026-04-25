@@ -1,23 +1,39 @@
+<!-- File: templates/register.html -->
+
+<!-- Kế thừa layout chung -->
 {% extends "base.html" %}
 
 {% block content %}
+
 <h2>Register</h2>
 
+<!-- Form gửi POST request tới route /register -->
 <form method="POST">
+
+    <!-- Username -->
     <label>Username</label>
     <input type="text" name="username" required>
 
+    <!-- Email -->
     <label>Email</label>
     <input type="email" name="email" required>
 
+    <!-- Phone number -->
     <label>Phone Number</label>
     <input type="text" name="phone">
 
+    <!-- Password -->
     <label>Password</label>
     <input type="password" name="password" required>
 
+    <!-- Submit button -->
     <button type="submit">Register</button>
 </form>
 
-<p>Already have an account? <a href="{{ url_for('login') }}">Login here</a></p>
+<!-- Link chuyển về login -->
+<p>
+    Already have an account?
+    <a href="{{ url_for('login') }}">Login here</a>
+</p>
+
 {% endblock %}

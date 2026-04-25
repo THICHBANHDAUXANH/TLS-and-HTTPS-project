@@ -4,26 +4,55 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+
+    <!-- Tiêu đề tab browser -->
     <title>Personal Finance Management</title>
+
+    <!-- Link tới file CSS trong folder static -->
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
+
 <body>
 
-    <header>
-        <h1>Personal Finance Management System</h1>
-        <nav>
+<header>
+    <h1>Personal Finance Management System</h1>
+
+    <!-- Navigation bar -->
+    <nav>
+        <!-- Nếu user đã login thì hiện menu chính -->
+        {% if session.get("user_id") %}
             <a href="{{ url_for('dashboard') }}">Dashboard</a>
-            <a href="#">Accounts</a>
+            <a href="{{ url_for('accounts') }}">Accounts</a>
             <a href="#">Income</a>
             <a href="#">Expenses</a>
             <a href="#">Budgets</a>
             <a href="#">Reports</a>
-        </nav>
-    </header>
+            <a href="{{ url_for('logout') }}">Logout</a>
 
-    <main>
-        {% block content %}{% endblock %}
-    </main>
+        <!-- Nếu chưa login thì chỉ hiện Login/Register -->
+        {% else %}
+            <a href="{{ url_for('login') }}">Login</a>
+            <a href="{{ url_for('register') }}">Register</a>
+        {% endif %}
+    </nav>
+</header>
+
+<main>
+    <!-- Hiển thị flash messages từ Flask -->
+    <!-- Ví dụ: Login successful, Invalid password, Registration successful -->
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <p>{{ message }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <!-- Nội dung riêng của từng page sẽ được render ở đây -->
+    {% block content %}{% endblock %}
+</main>
 
 </body>
 </html>
