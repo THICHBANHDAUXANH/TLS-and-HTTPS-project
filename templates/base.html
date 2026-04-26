@@ -4,55 +4,95 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-
-    <!-- Tiêu đề tab browser -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Personal Finance Management</title>
-
-    <!-- Link tới file CSS trong folder static -->
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 
-<body>
+<body class="{% if not session.get('user_id') %}auth-page{% endif %}">
 
-<header>
-    <h1>Personal Finance Management System</h1>
+<div class="app-shell">
+    {% if session.get("user_id") %}
+    <aside class="sidebar">
+        <div class="menu-button">=</div>
 
-    <!-- Navigation bar -->
-    <nav>
-        <!-- Nếu user đã login thì hiện menu chính -->
+        <nav class="side-nav">
+            <a href="{{ url_for('dashboard') }}" class="{% if request.endpoint == 'dashboard' %}active{% endif %}">
+                <span class="nav-icon">D</span>
+                <span>Dashboard</span>
+            </a>
+            <a href="{{ url_for('accounts') }}" class="{% if request.endpoint in ['accounts', 'delete_account_route'] %}active{% endif %}">
+                <span class="nav-icon">A</span>
+                <span>Accounts</span>
+            </a>
+            <a href="{{ url_for('income') }}" class="{% if request.endpoint in ['income', 'delete_income_route'] %}active{% endif %}">
+                <span class="nav-icon">I</span>
+                <span>Income</span>
+            </a>
+            <a href="{{ url_for('expenses') }}" class="{% if request.endpoint in ['expenses', 'delete_expense_route'] %}active{% endif %}">
+                <span class="nav-icon">E</span>
+                <span>Expenses</span>
+            </a>
+            <a href="{{ url_for('budgets') }}" class="{% if request.endpoint in ['budgets', 'delete_budget_route'] %}active{% endif %}">
+                <span class="nav-icon">B</span>
+                <span>Budgets</span>
+            </a>
+            <a href="{{ url_for('reports') }}" class="{% if request.endpoint == 'reports' %}active{% endif %}">
+                <span class="nav-icon">R</span>
+                <span>Reports</span>
+            </a>
+        </nav>
+    </aside>
+    {% endif %}
+
+    <div class="app-content">
         {% if session.get("user_id") %}
-            <a href="{{ url_for('dashboard') }}">Dashboard</a>
-            <a href="{{ url_for('accounts') }}">Accounts</a>
-            <a href="{{ url_for('income') }}">Income</a>
-            <a href="{{ url_for('expenses') }}">Expenses</a>
-            <a href="{{ url_for('budgets') }}">Budgets</a>
-            <a href="{{ url_for('reports') }}">Reports</a>
-            <a href="{{ url_for('logout') }}">Logout</a>
-
-        <!-- Nếu chưa login thì chỉ hiện Login/Register -->
-        {% else %}
-            <a href="{{ url_for('login') }}">Login</a>
-            <a href="{{ url_for('register') }}">Register</a>
-        {% endif %}
-    </nav>
-</header>
-
-<main>
-    <!-- Hiển thị flash messages từ Flask -->
-    <!-- Ví dụ: Login successful, Invalid password, Registration successful -->
-    {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            <div class="messages">
-                {% for message in messages %}
-                    <p>{{ message }}</p>
-                {% endfor %}
+        <header class="topbar">
+            <div class="wallet-summary">
+                <div class="wallet-avatar">
+                    {{ (session.get("username") or "U")[0] | upper }}
+                </div>
+                <div>
+                    <div class="wallet-label">{{ session.get("username") }}</div>
+                    <div class="wallet-subtitle">{{ session.get("email") }}</div>
+                </div>
             </div>
-        {% endif %}
-    {% endwith %}
 
-    <!-- Nội dung riêng của từng page sẽ được render ở đây -->
-    {% block content %}{% endblock %}
-</main>
+            <div class="topbar-actions">
+                <a href="{{ url_for('expenses') }}" class="add-transaction-btn">Add Transaction</a>
+                <a href="{{ url_for('logout') }}" class="logout-link">Logout</a>
+            </div>
+        </header>
+        {% endif %}
+
+        <main class="{% if not session.get('user_id') %}auth-main{% endif %}">
+            {% if not session.get("user_id") %}
+            <section class="auth-card">
+                <div class="auth-brand">
+                    <div class="wallet-avatar large">P</div>
+                    <h1>Personal Finance</h1>
+                    <p>Manage accounts, transactions, budgets, and reports in one place.</p>
+                </div>
+            {% endif %}
+
+                {% with messages = get_flashed_messages() %}
+                    {% if messages %}
+                        <div class="messages">
+                            {% for message in messages %}
+                                <p>{{ message }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endwith %}
+
+                {% block content %}{% endblock %}
+
+            {% if not session.get("user_id") %}
+            </section>
+            {% endif %}
+        </main>
+    </div>
+</div>
 
 </body>
 </html>
