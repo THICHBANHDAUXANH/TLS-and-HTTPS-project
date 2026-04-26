@@ -1,0 +1,237 @@
+<!-- File: templates/income.html -->
+
+{% extends "base.html" %}
+
+{% block content %}
+
+<!-- Page title -->
+<div class="page-title">
+    <h2>Income Management</h2>
+    <p>
+        Record and manage income transactions. Each income is linked to one financial account.
+    </p>
+</div>
+
+<div class="grid-layout">
+
+    <!-- Add/Edit income form -->
+    <section class="card-section">
+        {% if editing_income %}
+            <h3>Edit Income</h3>
+        {% else %}
+            <h3>Add New Income</h3>
+        {% endif %}
+
+        {% if accounts %}
+
+        <form method="POST" class="form-card">
+
+            <!-- Hidden fields tell Flask whether this form is adding or editing -->
+            {% if editing_income %}
+                <input type="hidden" name="form_mode" value="edit">
+                <input type="hidden" name="income_id" value="{{ editing_income.IncomeID }}">
+            {% else %}
+                <input type="hidden" name="form_mode" value="add">
+            {% endif %}
+
+            <!-- Select account that receives income -->
+            <div class="form-group">
+                <label>Account</label>
+                <select name="account_id" required>
+                    {% for account in accounts %}
+                        <option 
+                            value="{{ account.AccountID }}"
+                            {% if editing_income and account.AccountID == editing_income.AccountID %}
+                                selected
+                            {% endif %}
+                        >
+                            {{ account.AccountName }} - {{ account.AccountType }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Income amount -->
+            <div class="form-group">
+                <label>Amount</label>
+
+                <div class="money-input-wrapper">
+                    <input 
+                        type="text"
+                        id="income_amount_display"
+                        placeholder="Example: 2,000,000"
+                        autocomplete="off"
+                        required
+                        {% if editing_income %}
+                            value="{{ "{:,.0f}".format(editing_income.Amount) }}"
+                        {% endif %}
+                    >
+                    <span class="currency-label">VND</span>
+                </div>
+
+                <input 
+                    type="hidden" 
+                    name="amount" 
+                    id="income_amount"
+                    {% if editing_income %}
+                        value="{{ "{:.0f}".format(editing_income.Amount) }}"
+                    {% endif %}
+                >
+            </div>
+
+            <!-- Income date -->
+            <div class="form-group">
+                <label>Income Date</label>
+                <input 
+                    type="date" 
+                    name="income_date" 
+                    required
+                    {% if editing_income %}
+                        value="{{ editing_income.IncomeDate }}"
+                    {% endif %}
+                >
+            </div>
+
+            <!-- Income description -->
+            <div class="form-group">
+                <label>Description</label>
+                <input 
+                    type="text" 
+                    name="description" 
+                    placeholder="Example: Monthly salary"
+                    {% if editing_income %}
+                        value="{{ editing_income.Description }}"
+                    {% endif %}
+                >
+            </div>
+
+            {% if editing_income %}
+                <button type="submit" class="primary-btn">Update Income</button>
+                <a href="{{ url_for('income') }}" class="secondary-btn">Cancel</a>
+            {% else %}
+                <button type="submit" class="primary-btn">Add Income</button>
+            {% endif %}
+        </form>
+
+        {% else %}
+
+        <!-- Show this message if user has no account yet -->
+        <div class="empty-state">
+            <p>You need to create an account before adding income.</p>
+            <p>
+                Go to <a href="{{ url_for('accounts') }}">Accounts</a> page and add a bank or cash account first.
+            </p>
+        </div>
+
+        {% endif %}
+    </section>
+
+    <!-- Income records table -->
+    <section class="card-section table-section">
+        <h3>Your Income Records</h3>
+
+        {% if income_records %}
+
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Date</th>
+                    <th>Account</th>
+                    <th>Type</th>
+                    <th>Amount</th>
+                    <th>Description</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for income in income_records %}
+                <tr>
+                    <td>{{ income.IncomeID }}</td>
+                    <td>{{ income.IncomeDate }}</td>
+                    <td>{{ income.AccountName }}</td>
+                    <td>
+                        <span class="badge">{{ income.AccountType }}</span>
+                    </td>
+                    <td>{{ "{:,.0f}".format(income.Amount) }} VND</td>
+                    <td>{{ income.Description }}</td>
+                    <td>
+                        <!-- Edit button uses GET query parameter edit_id -->
+                        <a 
+                            href="{{ url_for('income', edit_id=income.IncomeID) }}" 
+                            class="edit-btn"
+                        >
+                            Edit
+                        </a>
+
+                        <!-- Delete income form -->
+                        <form 
+                            method="POST" 
+                            action="{{ url_for('delete_income_route', income_id=income.IncomeID) }}" 
+                            class="inline-form"
+                        >
+                            <button 
+                                type="submit" 
+                                class="danger-btn"
+                                onclick="return confirm('Are you sure you want to delete this income record?')"
+                            >
+                                Delete
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        {% else %}
+
+        <div class="empty-state">
+            <p>No income records found.</p>
+            <p>Add your first income transaction using the form.</p>
+        </div>
+
+        {% endif %}
+    </section>
+
+</div>
+
+<!-- Format money input -->
+<script>
+    /*
+        Format money while typing.
+
+        Example:
+        User types: 2000000
+        Display:    2,000,000
+        Hidden:     2000000
+
+        Flask receives:
+        request.form.get("amount") = "2000000"
+    */
+
+    const incomeAmountDisplay = document.getElementById("income_amount_display");
+    const incomeAmountHidden = document.getElementById("income_amount");
+
+    if (incomeAmountDisplay && incomeAmountHidden) {
+        incomeAmountDisplay.addEventListener("input", function () {
+            // Remove all non-digit characters
+            let rawValue = incomeAmountDisplay.value.replace(/\D/g, "");
+
+            // Store clean number for backend/database
+            incomeAmountHidden.value = rawValue;
+
+            // If empty, keep input empty
+            if (rawValue === "") {
+                incomeAmountDisplay.value = "";
+                return;
+            }
+
+            // Format display with commas
+            incomeAmountDisplay.value = Number(rawValue).toLocaleString("en-US");
+        });
+    }
+</script>
+
+{% endblock %}

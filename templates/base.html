@@ -23,10 +23,10 @@
         {% if session.get("user_id") %}
             <a href="{{ url_for('dashboard') }}">Dashboard</a>
             <a href="{{ url_for('accounts') }}">Accounts</a>
-            <a href="#">Income</a>
-            <a href="#">Expenses</a>
-            <a href="#">Budgets</a>
-            <a href="#">Reports</a>
+            <a href="{{ url_for('income') }}">Income</a>
+            <a href="{{ url_for('expenses') }}">Expenses</a>
+            <a href="{{ url_for('budgets') }}">Budgets</a>
+            <a href="{{ url_for('reports') }}">Reports</a>
             <a href="{{ url_for('logout') }}">Logout</a>
 
         <!-- Nếu chưa login thì chỉ hiện Login/Register -->

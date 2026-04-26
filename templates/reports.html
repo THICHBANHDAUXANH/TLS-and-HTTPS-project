@@ -1,0 +1,457 @@
+<!-- File: templates/reports.html -->
+
+{% extends "base.html" %}
+
+{% block content %}
+
+<!-- Page title -->
+<div class="page-title">
+    <h2>Reports and Analysis</h2>
+    <p>
+        View monthly summaries, category-wise spending, budget status,
+        account balances, and recent transactions.
+    </p>
+</div>
+
+<!-- Report filter -->
+<section class="card-section report-filter-section">
+    <h3>Report Filter</h3>
+
+    <form method="GET" action="{{ url_for('reports') }}" class="filter-form">
+
+        <!-- Month filter -->
+        <div class="form-group">
+            <label>Month</label>
+            <select name="month" required>
+                {% for m in range(1, 13) %}
+                    <option 
+                        value="{{ m }}"
+                        {% if m == selected_month %}
+                            selected
+                        {% endif %}
+                    >
+                        {{ m }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Year filter -->
+        <div class="form-group">
+            <label>Year</label>
+            <input 
+                type="number" 
+                name="year" 
+                min="2000" 
+                step="1" 
+                value="{{ selected_year }}" 
+                required
+            >
+        </div>
+
+        <button type="submit" class="primary-btn">Apply Filter</button>
+    </form>
+</section>
+
+<!-- Summary cards -->
+<div class="cards report-summary-cards">
+
+    <!-- Total income -->
+    <div class="card">
+        <h3>Total Income</h3>
+        <p class="income-amount">
+            {{ "{:,.0f}".format(selected_summary.TotalIncome) }} VND
+        </p>
+    </div>
+
+    <!-- Total expense -->
+    <div class="card">
+        <h3>Total Expense</h3>
+        <p class="expense-amount">
+            {{ "{:,.0f}".format(selected_summary.TotalExpense) }} VND
+        </p>
+    </div>
+
+    <!-- Savings -->
+    <div class="card">
+        <h3>Savings</h3>
+        <p>
+            {{ "{:,.0f}".format(selected_summary.Savings) }} VND
+        </p>
+    </div>
+
+</div>
+
+<!-- Charts -->
+<div class="chart-grid">
+
+    <!-- Monthly income vs expense chart -->
+    <section class="card-section chart-card">
+        <h3>Monthly Income vs Expense</h3>
+        <canvas id="monthlyChart"></canvas>
+    </section>
+
+    <!-- Category spending chart -->
+    <section class="card-section chart-card">
+        <h3>Category-wise Spending {{ selected_month }}/{{ selected_year }}</h3>
+
+        {% if category_spending %}
+            <canvas id="categoryChart"></canvas>
+        {% else %}
+            <div class="empty-state">
+                <p>No category spending data for this period.</p>
+            </div>
+        {% endif %}
+    </section>
+
+    <!-- Budget vs actual spending chart -->
+    <section class="card-section chart-card">
+        <h3>Budget vs Actual Spending {{ selected_month }}/{{ selected_year }}</h3>
+
+        {% if budget_report %}
+            <canvas id="budgetChart"></canvas>
+        {% else %}
+            <div class="empty-state">
+                <p>No budget data for this period.</p>
+            </div>
+        {% endif %}
+    </section>
+
+</div>
+
+<!-- Account balance summary -->
+<section class="card-section table-section">
+    <h3>Account Balance Summary</h3>
+
+    {% if account_balances %}
+
+    <table>
+        <thead>
+            <tr>
+                <th>Account</th>
+                <th>Type</th>
+                <th>Balance</th>
+                <th>Created At</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for account in account_balances %}
+            <tr>
+                <td>{{ account.AccountName }}</td>
+                <td>
+                    <span class="badge">{{ account.AccountType }}</span>
+                </td>
+                <td>{{ "{:,.0f}".format(account.Balance) }} VND</td>
+                <td>{{ account.CreatedAt }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% else %}
+
+    <div class="empty-state">
+        <p>No accounts found.</p>
+    </div>
+
+    {% endif %}
+</section>
+
+<!-- Category-wise spending table -->
+<section class="card-section table-section">
+    <h3>Category-wise Spending</h3>
+
+    {% if category_spending %}
+
+    <table>
+        <thead>
+            <tr>
+                <th>Category</th>
+                <th>Number of Transactions</th>
+                <th>Total Spent</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for category in category_spending %}
+            <tr>
+                <td>{{ category.CategoryName }}</td>
+                <td>{{ category.NumberOfTransactions }}</td>
+                <td class="expense-amount">
+                    {{ "{:,.0f}".format(category.TotalSpent) }} VND
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% else %}
+
+    <div class="empty-state">
+        <p>No spending records found for this month.</p>
+    </div>
+
+    {% endif %}
+</section>
+
+<!-- Budget status table -->
+<section class="card-section table-section">
+    <h3>Budget Status</h3>
+
+    {% if budget_report %}
+
+    <table>
+        <thead>
+            <tr>
+                <th>Category</th>
+                <th>Limit</th>
+                <th>Actual Spent</th>
+                <th>Remaining</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for budget in budget_report %}
+            <tr>
+                <td>{{ budget.CategoryName }}</td>
+                <td>{{ "{:,.0f}".format(budget.LimitAmount) }} VND</td>
+                <td>{{ "{:,.0f}".format(budget.ActualSpent) }} VND</td>
+                <td>{{ "{:,.0f}".format(budget.RemainingAmount) }} VND</td>
+                <td>
+                    {% if budget.BudgetStatus == "SAFE" %}
+                        <span class="status-badge status-safe">SAFE</span>
+                    {% elif budget.BudgetStatus == "WARNING" %}
+                        <span class="status-badge status-warning">WARNING</span>
+                    {% elif budget.BudgetStatus == "OVER_BUDGET" %}
+                        <span class="status-badge status-over">OVER BUDGET</span>
+                    {% else %}
+                        <span class="status-badge">{{ budget.BudgetStatus }}</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% else %}
+
+    <div class="empty-state">
+        <p>No budget records found for this month.</p>
+    </div>
+
+    {% endif %}
+</section>
+
+<!-- Monthly summary table -->
+<section class="card-section table-section">
+    <h3>Monthly Financial Summary</h3>
+
+    {% if monthly_summary %}
+
+    <table>
+        <thead>
+            <tr>
+                <th>Month/Year</th>
+                <th>Total Income</th>
+                <th>Total Expense</th>
+                <th>Savings</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for summary in monthly_summary %}
+            <tr>
+                <td>{{ summary.Month }}/{{ summary.Year }}</td>
+                <td class="income-amount">
+                    {{ "{:,.0f}".format(summary.TotalIncome) }} VND
+                </td>
+                <td class="expense-amount">
+                    {{ "{:,.0f}".format(summary.TotalExpense) }} VND
+                </td>
+                <td>
+                    {{ "{:,.0f}".format(summary.Savings) }} VND
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% else %}
+
+    <div class="empty-state">
+        <p>No monthly summary available.</p>
+    </div>
+
+    {% endif %}
+</section>
+
+<!-- Recent transactions -->
+<section class="card-section table-section">
+    <h3>Recent Transactions</h3>
+
+    {% if transaction_history %}
+
+    <table>
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Type</th>
+                <th>Account</th>
+                <th>Category</th>
+                <th>Amount</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for transaction in transaction_history %}
+            <tr>
+                <td>{{ transaction.TransactionDate }}</td>
+                <td>{{ transaction.TransactionType }}</td>
+                <td>{{ transaction.AccountName }}</td>
+                <td>{{ transaction.CategoryName }}</td>
+                <td>
+                    {% if transaction.TransactionType == "EXPENSE" %}
+                        <span class="expense-amount">
+                            -{{ "{:,.0f}".format(transaction.Amount) }} VND
+                        </span>
+                    {% else %}
+                        <span class="income-amount">
+                            +{{ "{:,.0f}".format(transaction.Amount) }} VND
+                        </span>
+                    {% endif %}
+                </td>
+                <td>{{ transaction.Description }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% else %}
+
+    <div class="empty-state">
+        <p>No transactions found.</p>
+    </div>
+
+    {% endif %}
+</section>
+
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    /*
+        Convert Python data from Flask into JavaScript arrays.
+        tojson is required so the data becomes valid JavaScript.
+    */
+
+    const monthlyLabels = {{ monthly_labels | tojson }};
+    const monthlyIncomeValues = {{ monthly_income_values | tojson }};
+    const monthlyExpenseValues = {{ monthly_expense_values | tojson }};
+
+    const categoryLabels = {{ category_labels | tojson }};
+    const categoryValues = {{ category_values | tojson }};
+
+    const budgetLabels = {{ budget_labels | tojson }};
+    const budgetLimitValues = {{ budget_limit_values | tojson }};
+    const budgetActualValues = {{ budget_actual_values | tojson }};
+
+    /*
+        Chart 1: Monthly Income vs Expense
+    */
+    const monthlyCanvas = document.getElementById("monthlyChart");
+
+    if (monthlyCanvas) {
+        new Chart(monthlyCanvas, {
+            type: "bar",
+            data: {
+                labels: monthlyLabels,
+                datasets: [
+                    {
+                        label: "Income",
+                        data: monthlyIncomeValues
+                    },
+                    {
+                        label: "Expense",
+                        data: monthlyExpenseValues
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: "bottom"
+                    }
+                }
+            }
+        });
+    }
+
+    /*
+        Chart 2: Category-wise Spending
+    */
+    const categoryCanvas = document.getElementById("categoryChart");
+
+    if (categoryCanvas) {
+        new Chart(categoryCanvas, {
+            type: "pie",
+            data: {
+                labels: categoryLabels,
+                datasets: [
+                    {
+                        label: "Spending",
+                        data: categoryValues
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: "bottom"
+                    }
+                }
+            }
+        });
+    }
+
+    /*
+        Chart 3: Budget vs Actual Spending
+    */
+    const budgetCanvas = document.getElementById("budgetChart");
+
+    if (budgetCanvas) {
+        new Chart(budgetCanvas, {
+            type: "bar",
+            data: {
+                labels: budgetLabels,
+                datasets: [
+                    {
+                        label: "Budget Limit",
+                        data: budgetLimitValues
+                    },
+                    {
+                        label: "Actual Spent",
+                        data: budgetActualValues
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: "bottom"
+                    }
+                }
+            }
+        });
+    }
+</script>
+
+{% endblock %}

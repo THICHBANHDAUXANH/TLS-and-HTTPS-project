@@ -4,81 +4,140 @@
 
 {% block content %}
 
-<h2>Accounts</h2>
+<div class="page-title">
+    <h2>Accounts</h2>
+    <p>
+        Manage bank accounts, cash wallets, and e-wallets used by your finance records.
+    </p>
+</div>
 
-<p>
-    This page allows users to manage their financial accounts, including bank accounts,
-    cash wallets, and e-wallets.
-</p>
+<div class="grid-layout">
 
-<!-- Form thêm account mới -->
-<h3>Add New Account</h3>
+    <section class="card-section">
+        {% if editing_account %}
+            <h3>Edit Account</h3>
+        {% else %}
+            <h3>Add New Account</h3>
+        {% endif %}
 
-<form method="POST">
+        <form method="POST" class="form-card">
+            {% if editing_account %}
+                <input type="hidden" name="form_mode" value="edit">
+                <input type="hidden" name="account_id" value="{{ editing_account.AccountID }}">
+            {% else %}
+                <input type="hidden" name="form_mode" value="add">
+            {% endif %}
 
-    <!-- Tên account, ví dụ: Main Bank Account, Cash Wallet -->
-    <label>Account Name</label>
-    <input type="text" name="account_name" placeholder="Example: Cash Wallet" required>
+            <div class="form-group">
+                <label>Account Name</label>
+                <input
+                    type="text"
+                    name="account_name"
+                    placeholder="Example: Cash Wallet"
+                    required
+                    {% if editing_account %}
+                        value="{{ editing_account.AccountName }}"
+                    {% endif %}
+                >
+            </div>
 
-    <!-- Loại account -->
-    <label>Account Type</label>
-    <select name="account_type" required>
-        <option value="BANK">BANK</option>
-        <option value="CASH">CASH</option>
-        <option value="EWALLET">EWALLET</option>
-    </select>
+            <div class="form-group">
+                <label>Account Type</label>
+                <select name="account_type" required>
+                    <option value="BANK" {% if editing_account and editing_account.AccountType == "BANK" %}selected{% endif %}>BANK</option>
+                    <option value="CASH" {% if editing_account and editing_account.AccountType == "CASH" %}selected{% endif %}>CASH</option>
+                    <option value="EWALLET" {% if editing_account and editing_account.AccountType == "EWALLET" %}selected{% endif %}>EWALLET</option>
+                </select>
+            </div>
 
-    <!-- Số dư ban đầu -->
-    <label>Initial Balance</label>
-    <input type="number" name="balance" min="0" step="1000" placeholder="Example: 1000000" required>
+            <div class="form-group">
+                <label>Balance</label>
+                <div class="money-input-wrapper">
+                    <input
+                        type="number"
+                        name="balance"
+                        min="0"
+                        step="1000"
+                        placeholder="Example: 1000000"
+                        required
+                        {% if editing_account %}
+                            value="{{ '{:.0f}'.format(editing_account.Balance) }}"
+                        {% endif %}
+                    >
+                    <span class="currency-label">VND</span>
+                </div>
+            </div>
 
-    <button type="submit">Add Account</button>
-</form>
+            {% if editing_account %}
+                <button type="submit" class="primary-btn">Update Account</button>
+                <a href="{{ url_for('accounts') }}" class="secondary-btn">Cancel</a>
+            {% else %}
+                <button type="submit" class="primary-btn">Add Account</button>
+            {% endif %}
+        </form>
+    </section>
 
-<!-- Danh sách account hiện có -->
-<h3>Your Accounts</h3>
+    <section class="card-section table-section">
+        <h3>Your Accounts</h3>
 
-{% if accounts %}
+        {% if accounts %}
 
-<table>
-    <thead>
-        <tr>
-            <th>Account ID</th>
-            <th>Account Name</th>
-            <th>Account Type</th>
-            <th>Balance</th>
-            <th>Created At</th>
-            <th>Action</th>
-        </tr>
-    </thead>
+        <table>
+            <thead>
+                <tr>
+                    <th>Account ID</th>
+                    <th>Account Name</th>
+                    <th>Account Type</th>
+                    <th>Balance</th>
+                    <th>Created At</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
 
-    <tbody>
-        {% for account in accounts %}
-        <tr>
-            <td>{{ account.AccountID }}</td>
-            <td>{{ account.AccountName }}</td>
-            <td>{{ account.AccountType }}</td>
-            <td>{{ "{:,.0f}".format(account.Balance) }} VND</td>
-            <td>{{ account.CreatedAt }}</td>
+            <tbody>
+                {% for account in accounts %}
+                <tr>
+                    <td>{{ account.AccountID }}</td>
+                    <td>{{ account.AccountName }}</td>
+                    <td><span class="badge">{{ account.AccountType }}</span></td>
+                    <td>{{ "{:,.0f}".format(account.Balance) }} VND</td>
+                    <td>{{ account.CreatedAt }}</td>
+                    <td class="action-cell">
+                        <a
+                            href="{{ url_for('accounts', edit_id=account.AccountID) }}"
+                            class="edit-btn"
+                        >
+                            Edit
+                        </a>
 
-            <td>
-                <!-- Form xóa account -->
-                <!-- Dùng POST để an toàn hơn GET -->
-                <form method="POST" action="{{ url_for('delete_account_route', account_id=account.AccountID) }}" class="inline-form">
-                    <button type="submit" onclick="return confirm('Are you sure you want to delete this account?')">
-                        Delete
-                    </button>
-                </form>
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+                        <form
+                            method="POST"
+                            action="{{ url_for('delete_account_route', account_id=account.AccountID) }}"
+                            class="inline-form"
+                        >
+                            <button
+                                type="submit"
+                                class="danger-btn"
+                                onclick="return confirm('Are you sure you want to delete this account?')"
+                            >
+                                Delete
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
 
-{% else %}
+        {% else %}
 
-<p>No accounts found. Please add your first account.</p>
+        <div class="empty-state">
+            <p>No accounts found. Please add your first account.</p>
+        </div>
 
-{% endif %}
+        {% endif %}
+    </section>
+
+</div>
 
 {% endblock %}

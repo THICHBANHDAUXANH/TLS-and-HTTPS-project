@@ -1,0 +1,262 @@
+<!-- File: templates/budgets.html -->
+
+{% extends "base.html" %}
+
+{% block content %}
+
+<!-- Page title -->
+<div class="page-title">
+    <h2>Budget Management</h2>
+    <p>
+        Set monthly spending limits for expense categories and monitor whether spending is safe, close to the limit, or over budget.
+    </p>
+</div>
+
+<div class="grid-layout">
+
+    <!-- Add/Edit budget form -->
+    <section class="card-section">
+        {% if editing_budget %}
+            <h3>Edit Budget</h3>
+        {% else %}
+            <h3>Add New Budget</h3>
+        {% endif %}
+
+        {% if categories %}
+
+        <form method="POST" class="form-card">
+
+            <!-- Hidden fields tell Flask whether this form is adding or editing -->
+            {% if editing_budget %}
+                <input type="hidden" name="form_mode" value="edit">
+                <input type="hidden" name="budget_id" value="{{ editing_budget.BudgetID }}">
+            {% else %}
+                <input type="hidden" name="form_mode" value="add">
+            {% endif %}
+
+            <!-- Select expense category -->
+            <div class="form-group">
+                <label>Category</label>
+                <select name="category_id" required>
+                    {% for category in categories %}
+                        <option 
+                            value="{{ category.CategoryID }}"
+                            {% if editing_budget and category.CategoryID == editing_budget.CategoryID %}
+                                selected
+                            {% endif %}
+                        >
+                            {{ category.CategoryName }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Month -->
+            <div class="form-group">
+                <label>Month</label>
+                <select name="month" required>
+                    {% for m in range(1, 13) %}
+                        <option 
+                            value="{{ m }}"
+                            {% if editing_budget and m == editing_budget.Month %}
+                                selected
+                            {% endif %}
+                        >
+                            {{ m }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Year -->
+            <div class="form-group">
+                <label>Year</label>
+                <input 
+                    type="number"
+                    name="year"
+                    min="2000"
+                    step="1"
+                    required
+                    {% if editing_budget %}
+                        value="{{ editing_budget.Year }}"
+                    {% else %}
+                        value="2026"
+                    {% endif %}
+                >
+            </div>
+
+            <!-- Budget limit amount -->
+            <div class="form-group">
+                <label>Limit Amount</label>
+
+                <!-- 
+                    Visible input for user.
+                    Example: user types 2000000, JavaScript displays 2,000,000.
+                    This input does NOT have name="limit_amount" to avoid sending commas to Flask.
+                -->
+                <div class="money-input-wrapper">
+                    <input 
+                        type="text"
+                        id="budget_amount_display"
+                        placeholder="Example: 2,000,000"
+                        autocomplete="off"
+                        required
+                        {% if editing_budget %}
+                            value="{{ "{:,.0f}".format(editing_budget.LimitAmount) }}"
+                        {% endif %}
+                    >
+                    <span class="currency-label">VND</span>
+                </div>
+
+                <!-- 
+                    Hidden input sent to Flask.
+                    Example: display value = 2,000,000, hidden value = 2000000.
+                -->
+                <input 
+                    type="hidden" 
+                    name="limit_amount" 
+                    id="budget_amount"
+                    {% if editing_budget %}
+                        value="{{ "{:.0f}".format(editing_budget.LimitAmount) }}"
+                    {% endif %}
+                >
+            </div>
+
+            {% if editing_budget %}
+                <button type="submit" class="primary-btn">Update Budget</button>
+                <a href="{{ url_for('budgets') }}" class="secondary-btn">Cancel</a>
+            {% else %}
+                <button type="submit" class="primary-btn">Add Budget</button>
+            {% endif %}
+        </form>
+
+        {% else %}
+
+        <div class="empty-state">
+            <p>No categories found. Please insert expense categories first.</p>
+        </div>
+
+        {% endif %}
+    </section>
+
+    <!-- Budget records table -->
+    <section class="card-section table-section">
+        <h3>Your Budget Status</h3>
+
+        {% if budget_records %}
+
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Month/Year</th>
+                    <th>Category</th>
+                    <th>Limit</th>
+                    <th>Actual Spent</th>
+                    <th>Remaining</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for budget in budget_records %}
+                <tr>
+                    <td>{{ budget.BudgetID }}</td>
+                    <td>{{ budget.Month }}/{{ budget.Year }}</td>
+                    <td>{{ budget.CategoryName }}</td>
+                    <td>{{ "{:,.0f}".format(budget.LimitAmount) }} VND</td>
+                    <td>{{ "{:,.0f}".format(budget.ActualSpent) }} VND</td>
+                    <td>{{ "{:,.0f}".format(budget.RemainingAmount) }} VND</td>
+
+                    <td>
+                        {% if budget.BudgetStatus == "SAFE" %}
+                            <span class="status-badge status-safe">SAFE</span>
+                        {% elif budget.BudgetStatus == "WARNING" %}
+                            <span class="status-badge status-warning">WARNING</span>
+                        {% elif budget.BudgetStatus == "OVER_BUDGET" %}
+                            <span class="status-badge status-over">OVER BUDGET</span>
+                        {% else %}
+                            <span class="status-badge">{{ budget.BudgetStatus }}</span>
+                        {% endif %}
+                    </td>
+
+                    <td class="action-cell">
+                        <!-- Edit button uses GET query parameter edit_id -->
+                        <a 
+                            href="{{ url_for('budgets', edit_id=budget.BudgetID) }}" 
+                            class="edit-btn"
+                        >
+                            Edit
+                        </a>
+
+                        <!-- Delete budget form -->
+                        <form 
+                            method="POST" 
+                            action="{{ url_for('delete_budget_route', budget_id=budget.BudgetID) }}" 
+                            class="inline-form"
+                        >
+                            <button 
+                                type="submit" 
+                                class="danger-btn"
+                                onclick="return confirm('Are you sure you want to delete this budget?')"
+                            >
+                                Delete
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        {% else %}
+
+        <div class="empty-state">
+            <p>No budgets found.</p>
+            <p>Add your first monthly budget using the form.</p>
+        </div>
+
+        {% endif %}
+    </section>
+
+</div>
+
+<!-- Format money input -->
+<script>
+    /*
+        Format budget amount while typing.
+
+        Example:
+        User types: 2000000
+        Display:    2,000,000
+        Hidden:     2000000
+
+        Flask receives:
+        request.form.get("limit_amount") = "2000000"
+    */
+
+    const budgetAmountDisplay = document.getElementById("budget_amount_display");
+    const budgetAmountHidden = document.getElementById("budget_amount");
+
+    if (budgetAmountDisplay && budgetAmountHidden) {
+        budgetAmountDisplay.addEventListener("input", function () {
+            // Remove all non-digit characters
+            let rawValue = budgetAmountDisplay.value.replace(/\D/g, "");
+
+            // Store clean number for backend/database
+            budgetAmountHidden.value = rawValue;
+
+            // If empty, keep input empty
+            if (rawValue === "") {
+                budgetAmountDisplay.value = "";
+                return;
+            }
+
+            // Format display with commas
+            budgetAmountDisplay.value = Number(rawValue).toLocaleString("en-US");
+        });
+    }
+</script>
+
+{% endblock %}

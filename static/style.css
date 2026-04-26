@@ -1,60 +1,468 @@
-/* Flash messages: hiện thông báo từ Flask */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background-color: #f4f7fb;
+    color: #1f2937;
+    font-family: Arial, Helvetica, sans-serif;
+    line-height: 1.5;
+}
+
+header {
+    background-color: #0f172a;
+    color: white;
+    padding: 20px 40px;
+}
+
+header h1 {
+    margin: 0 0 16px;
+    font-size: 28px;
+    font-weight: 700;
+}
+
+nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+nav a {
+    color: #e5e7eb;
+    text-decoration: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-weight: 600;
+}
+
+nav a:hover {
+    background-color: #1e293b;
+    color: white;
+}
+
+main {
+    width: min(1120px, calc(100% - 32px));
+    margin: 28px auto;
+}
+
+h2,
+h3 {
+    color: #111827;
+}
+
+h2 {
+    margin-top: 0;
+    font-size: 26px;
+}
+
+h3 {
+    margin-top: 28px;
+    font-size: 20px;
+}
+
+a {
+    color: #2563eb;
+}
+
+a:hover {
+    color: #1d4ed8;
+}
+
+form {
+    max-width: 560px;
+    background-color: white;
+    padding: 22px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+}
+
+label {
+    display: block;
+    margin: 14px 0 6px;
+    font-weight: 700;
+    color: #374151;
+}
+
+label:first-child {
+    margin-top: 0;
+}
+
+input,
+select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    background-color: white;
+    color: #111827;
+    font: inherit;
+}
+
+input:focus,
+select:focus {
+    border-color: #2563eb;
+    outline: 3px solid rgba(37, 99, 235, 0.18);
+}
+
+button {
+    display: inline-block;
+    margin-top: 18px;
+    border: 0;
+    border-radius: 6px;
+    background-color: #2563eb;
+    color: white;
+    padding: 10px 16px;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #1d4ed8;
+}
+
+.cards {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+    margin: 22px 0 30px;
+}
+
+.card {
+    background-color: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 18px;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+}
+
+.card h3 {
+    margin: 0 0 10px;
+    color: #475569;
+    font-size: 15px;
+}
+
+.card p {
+    margin: 0;
+    color: #0f172a;
+    font-size: 22px;
+    font-weight: 800;
+}
+
+.page-title {
+    margin-bottom: 22px;
+}
+
+.page-title p {
+    margin: 0;
+    color: #64748b;
+}
+
+.grid-layout {
+    display: grid;
+    grid-template-columns: minmax(280px, 380px) minmax(0, 1fr);
+    gap: 24px;
+    align-items: start;
+}
+
+.card-section {
+    min-width: 0;
+}
+
+.form-card {
+    max-width: none;
+}
+
+.form-group {
+    margin-bottom: 14px;
+}
+
+.form-group label {
+    margin-top: 0;
+}
+
+.primary-btn {
+    width: 100%;
+}
+
+.danger-btn {
+    background-color: #dc2626;
+}
+
+.danger-btn:hover {
+    background-color: #b91c1c;
+}
+
+.badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 999px;
+    background-color: #e0f2fe;
+    color: #075985;
+    font-size: 12px;
+    font-weight: 700;
+}
+
 .messages {
     background-color: #e0f2fe;
     color: #075985;
-    padding: 12px;
+    padding: 12px 14px;
+    border: 1px solid #bae6fd;
     border-radius: 6px;
     margin-bottom: 16px;
 }
 
-/* Bảng dữ liệu trong dashboard */
+.messages p {
+    margin: 0;
+}
+
 table {
     width: 100%;
     border-collapse: collapse;
     background: white;
     margin-top: 12px;
     margin-bottom: 24px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
 }
 
-/* Ô trong bảng */
-th, td {
-    border: 1px solid #ddd;
-    padding: 10px;
+th,
+td {
+    border-bottom: 1px solid #e5e7eb;
+    padding: 10px 12px;
     text-align: left;
 }
 
-/* Header bảng */
 th {
     background-color: #f1f5f9;
+    color: #334155;
+    font-weight: 700;
 }
 
-/* Dòng chẵn có màu nhẹ để dễ nhìn */
 tr:nth-child(even) {
     background-color: #f9fafb;
 }
 
-/* Select box dùng cho account type/category */
-select {
-    width: 100%;
-    padding: 8px;
-    margin-top: 4px;
-}
-
-/* Form xóa nằm trong table, không cần background to như form chính */
 .inline-form {
+    display: inline-block;
     background: none;
     padding: 0;
     width: auto;
+    max-width: none;
+    border: 0;
     border-radius: 0;
+    box-shadow: none;
 }
 
-/* Button trong inline form */
 .inline-form button {
     margin-top: 0;
     background-color: #dc2626;
 }
 
-/* Button đỏ khi hover */
 .inline-form button:hover {
     background-color: #b91c1c;
+}
+
+.action-cell {
+    white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+    header {
+        padding: 18px 20px;
+    }
+
+    .grid-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .cards {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 640px) {
+    main {
+        width: min(100% - 20px, 1120px);
+        margin: 20px auto;
+    }
+
+    header h1 {
+        font-size: 24px;
+    }
+
+    nav {
+        gap: 8px;
+    }
+
+    nav a {
+        padding: 7px 9px;
+    }
+
+    form {
+        padding: 16px;
+    }
+
+    .cards {
+        grid-template-columns: 1fr;
+    }
+
+    table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+}
+/* Làm table-section scroll được nếu bảng quá rộng */
+.table-section {
+    overflow-x: auto;
+}
+
+/* Link trong empty state */
+.empty-state a {
+    color: #2563eb;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.empty-state a:hover {
+    text-decoration: underline;
+}
+/* Money input wrapper: input + VND unit */
+.money-input-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+/* Add right padding so text does not overlap VND */
+.money-input-wrapper input {
+    width: 100%;
+    padding-right: 70px;
+}
+
+/* VND label inside input */
+.currency-label {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6b7280;
+    font-weight: 700;
+    pointer-events: none;
+}
+/* Edit button in tables */
+.edit-btn {
+    display: inline-block;
+    padding: 8px 10px;
+    background-color: #f59e0b;
+    color: white;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 14px;
+    margin-right: 6px;
+}
+
+.edit-btn:hover {
+    background-color: #d97706;
+}
+
+/* Cancel button in edit form */
+.secondary-btn {
+    display: block;
+    text-align: center;
+    margin-top: 10px;
+    padding: 11px 14px;
+    background-color: #6b7280;
+    color: white;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.secondary-btn:hover {
+    background-color: #4b5563;
+}
+/* Expense amount should be visually highlighted */
+.expense-amount {
+    color: #dc2626;
+    font-weight: 700;
+}
+/* Budget status badges */
+.status-badge {
+    display: inline-block;
+    padding: 5px 9px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.status-safe {
+    background-color: #dcfce7;
+    color: #166534;
+}
+
+.status-warning {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+
+.status-over {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+/* Report filter form */
+.report-filter-section {
+    margin-bottom: 24px;
+}
+
+.filter-form {
+    display: grid;
+    grid-template-columns: 160px 160px 180px;
+    gap: 16px;
+    align-items: end;
+}
+
+/* Report summary cards */
+.report-summary-cards {
+    margin-bottom: 24px;
+}
+
+/* Chart layout */
+.chart-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+    margin-bottom: 24px;
+}
+
+/* Chart card size */
+.chart-card {
+    min-height: 380px;
+}
+
+/* Chart canvas size */
+.chart-card canvas {
+    width: 100% !important;
+    height: 300px !important;
+}
+
+/* Income amount in reports */
+.income-amount {
+    color: #16a34a;
+    font-weight: 700;
+}
+
+/* Expense amount in reports */
+.expense-amount {
+    color: #dc2626;
+    font-weight: 700;
+}
+
+/* Responsive filter */
+@media (max-width: 800px) {
+    .filter-form {
+        grid-template-columns: 1fr;
+    }
 }
