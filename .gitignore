@@ -1,0 +1,48 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.crt
+*.csr
+
+# OS/editor files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.~lock.*
+.vscode/
+.idea/
+
+# Runtime/log files
+*.log
+*.pid
+
+# Generated reports and local evidence
+*.docx
+*.pdf
+figures/ATTT/
+sample UI/
+report_structure.md
+structure.md
+
+# Database dumps/backups generated from local data
+personal_finance_backup.sql
+backups/
+*.dump
+*.sql.gz

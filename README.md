@@ -1,766 +1,411 @@
-# Personal Finance Management System
+# Personal Finance Management with HTTPS/TLS Hardening
 
-## 1. Project Overview
-
-The **Personal Finance Management System** is a database-driven web application designed to help users manage personal financial activities. The system allows users to record income, expenses, financial accounts, expense categories, budgets, and account balance history.
-
-This project uses **MySQL** for database management and **Python Flask** for the web application. The main goal is to provide a simple and structured system that helps users track spending habits, monitor account balances, generate financial summaries, and receive budget alerts when spending exceeds planned limits.
-
----
-
-## 2. Project Objectives
-
-The main objectives of this project are:
-
-- Manage user information and authentication.
-- Record income and expense transactions.
-- Classify expenses into categories.
-- Support both bank and cash accounts.
-- Automatically update account balances after transactions.
-- Provide monthly financial summaries.
-- Support budget planning and over-budget alerts.
-- Generate reports for financial analysis.
-- Demonstrate SQL features such as views, functions, procedures, triggers, indexes, and backup.
-
----
-
-## 3. Main Features
-
-### 3.1 User Management
-
-The system supports user registration and login. User passwords are stored as hashed values instead of plain text for better security.
-
-Main functions:
-
-- Register new users.
-- Log in with email and password.
-- Store user session after login.
-- Protect user-specific financial data.
-
-### 3.2 Account Management
-
-The system uses an `Accounts` table to store different types of financial accounts.
-
-Supported account types:
-
-- `BANK`
-- `CASH`
-- `EWALLET`
-
-Examples:
-
-- Bank account
-- Cash wallet
-- E-wallet account
-
-Each account belongs to one user and has a current balance.
-
-### 3.3 Income Management
-
-Users can record income transactions. Each income transaction is linked to a specific account.
-
-Examples of income:
-
-- Monthly salary
-- Freelance income
-- Cash allowance
-- Bonus
-
-When a new income transaction is inserted, the system can automatically increase the account balance using triggers.
-
-### 3.4 Expense Management
-
-Users can record expense transactions. Each expense is linked to:
-
-- A user
-- An account
-- An expense category
-
-Examples of expense categories:
-
-- Food
-- Transport
-- Rent
-- Education
-- Healthcare
-- Shopping
-- Entertainment
-- Utilities
-- Savings
-- Other
-
-When a new expense transaction is inserted, the system can automatically decrease the account balance using triggers.
-
-### 3.5 Budget Management
-
-Users can set monthly budgets for specific expense categories.
-
-Examples:
-
-- Food budget for April 2026: 1,800,000 VND
-- Transport budget for April 2026: 700,000 VND
-
-The system compares actual spending with the budget limit and returns one of the following statuses:
-
-- `SAFE`
-- `WARNING`
-- `OVER_BUDGET`
-- `NO_BUDGET`
-
-### 3.6 Reports and Analysis
-
-The system provides several financial reports, including:
-
-- Monthly financial summary
-- Category-wise spending report
-- Budget status report
-- Account balance summary
-- Transaction history
-
-These reports are created using SQL views, functions, and stored procedures.
-
----
-
-## 4. Technology Stack
-
-| Component | Technology |
-|---|---|
-| Database | MySQL |
-| Database Tool | MySQL Workbench |
-| Backend | Python Flask |
-| Database Connector | mysql-connector-python |
-| Authentication | Werkzeug password hashing |
-| Frontend | HTML, CSS, Jinja2 Templates |
-| Backup | mysqldump |
-
----
-
-## 5. Project Structure
+This project is a database-driven personal finance web application built with Flask and MySQL. It also demonstrates how to place a local Flask app behind Nginx so the browser accesses it through HTTPS/TLS:
 
 ```text
-Personal Finance Management/
-|
-|-- app.py
-|-- config.py
-|-- requirements.txt
-|-- README.md
-|
-|-- database/
-|   |-- 00_create_database.sql
-|   |-- 01_create_tables.sql
-|   |-- 02_insert_sample_data.sql
-|   |-- 03_indexes.sql
-|   |-- 04_views.sql
-|   |-- 05_functions.sql
-|   |-- 06_procedures.sql
-|   |-- 07_triggers.sql
-|   `-- 08_backup.sql
-|
-|-- services/
-|   |-- db.py
-|   |-- auth_service.py
-|   |-- account_service.py
-|   |-- income_service.py
-|   |-- expense_service.py
-|   |-- budget_service.py
-|   `-- report_service.py
-|
-|-- templates/
-|   |-- base.html
-|   |-- login.html
-|   |-- register.html
-|   |-- dashboard.html
-|   |-- accounts.html
-|   |-- income.html
-|   |-- expenses.html
-|   |-- budgets.html
-|   `-- reports.html
-|
-`-- static/
-    `-- style.css
+Browser -> https://localhost:443 -> Nginx -> http://127.0.0.1:5000 -> Flask
 ```
 
----
+The Flask application handles authentication, accounts, income, expenses, budgets, and reports. Nginx handles HTTPS, HTTP-to-HTTPS redirects, TLS protocol selection, cipher policy, and security headers.
 
-## 6. File Description
+## Features
 
-### 6.1 Main Application Files
+- User registration and login with hashed passwords.
+- Account management for bank, cash, and e-wallet accounts.
+- Income and expense tracking.
+- Budget planning by category, month, and year.
+- Dashboard and report pages backed by SQL views/functions.
+- MySQL stored procedures and triggers for financial data processing.
+- HTTPS deployment with Nginx reverse proxy.
+- TLS hardening and security testing with `curl`, OpenSSL, and Wireshark.
 
-#### app.py
+## Tech Stack
 
-This is the main Flask application file. It defines the routes of the web system.
+| Area | Technology |
+| --- | --- |
+| Backend | Flask |
+| Database | MySQL |
+| DB connector | mysql-connector-python |
+| Templates | Jinja2 |
+| Styling | CSS |
+| Password hashing | Werkzeug |
+| HTTPS reverse proxy | Nginx |
+| Local certificate | mkcert |
+| TLS testing | curl, OpenSSL, Wireshark |
 
-Current and planned routes include:
+## Project Structure
 
-- `/`
-- `/login`
-- `/register`
-- `/dashboard`
-- `/accounts`
-- `/income`
-- `/expenses`
-- `/budgets`
-- `/reports`
-- `/logout`
-
-It controls how users interact with the web application.
-
-#### config.py
-
-This file stores configuration settings for the project.
-
-It contains:
-
-- MySQL host
-- MySQL port
-- MySQL username
-- MySQL password
-- Database name
-- Flask secret key
-
-Example:
-
-```python
-DB_CONFIG = {
-    "host": "127.0.0.1",
-    "port": 3306,
-    "user": "root",
-    "password": "YOUR_MYSQL_PASSWORD",
-    "database": "personal_finance_db",
-    "charset": "utf8mb4"
-}
-
-SECRET_KEY = "personal_finance_secret_key"
+```text
+.
+├── app.py
+├── config.py
+├── requirements.txt
+├── .env.example
+├── database/
+│   ├── 00_create_database.sql
+│   ├── 01_create_tables.sql
+│   ├── 02_insert_sample_data.sql
+│   ├── 03_indexes.sql
+│   ├── 04_views.sql
+│   ├── 05_functions.sql
+│   ├── 06_procedures.sql
+│   ├── 07_triggers.sql
+│   └── 08_backup.sql
+├── nginx/
+│   └── pfm.conf.example
+├── services/
+│   ├── db.py
+│   ├── auth_service.py
+│   ├── account_service.py
+│   ├── income_service.py
+│   ├── expense_service.py
+│   ├── budget_service.py
+│   └── report_service.py
+├── static/
+│   └── style.css
+└── templates/
+    ├── base.html
+    ├── login.html
+    ├── register.html
+    ├── dashboard.html
+    ├── accounts.html
+    ├── income.html
+    ├── expenses.html
+    ├── budgets.html
+    └── reports.html
 ```
 
-The `SECRET_KEY` is used by Flask to manage sessions securely.
+## Configuration
 
-#### requirements.txt
+Secrets are not stored in `config.py`. The app reads local settings from environment variables and `.env`.
 
-This file lists the Python libraries required to run the project.
-
-Main libraries:
-
-- Flask
-- mysql-connector-python
-- Werkzeug
-- python-dotenv
-
-Install them using:
+Create your local `.env` file:
 
 ```bash
+cp .env.example .env
+```
+
+Edit `.env`:
+
+```env
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=pfm_user
+DB_PASSWORD=your-local-password
+DB_NAME=personal_finance_db
+
+SECRET_KEY=replace-with-a-long-random-secret
+
+SESSION_COOKIE_SECURE=true
+SESSION_COOKIE_HTTPONLY=true
+SESSION_COOKIE_SAMESITE=Lax
+```
+
+`SESSION_COOKIE_SECURE=true` is correct when you access the app through `https://localhost` via Nginx. If you temporarily test Flask directly at `http://127.0.0.1:5000`, set it to `false` locally so the browser can send the session cookie over HTTP.
+
+## Database Setup
+
+Create the MySQL user yourself, then grant it access to the database. Example:
+
+```sql
+CREATE USER 'pfm_user'@'localhost' IDENTIFIED BY 'your-local-password';
+GRANT ALL PRIVILEGES ON personal_finance_db.* TO 'pfm_user'@'localhost';
+FLUSH PRIVILEGES;
+```
+
+Run the SQL scripts in order:
+
+```bash
+mysql -u root -p < database/00_create_database.sql
+mysql -u root -p personal_finance_db < database/01_create_tables.sql
+mysql -u root -p personal_finance_db < database/02_insert_sample_data.sql
+mysql -u root -p personal_finance_db < database/03_indexes.sql
+mysql -u root -p personal_finance_db < database/04_views.sql
+mysql -u root -p personal_finance_db < database/05_functions.sql
+mysql -u root -p personal_finance_db < database/06_procedures.sql
+mysql -u root -p personal_finance_db < database/07_triggers.sql
+```
+
+The sample users use placeholder password hashes, so create a real login account through `/register` when testing the Flask app.
+
+## Run the Flask App
+
+Install dependencies:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
----
-
-## 7. Database Scripts
-
-The `database/` folder contains all SQL scripts used to create and manage the database.
-
-### 7.1 00_create_database.sql
-
-Creates the database:
-
-- `personal_finance_db`
-
-This file also sets the character set to support Unicode data.
-
-### 7.2 01_create_tables.sql
-
-Creates all main tables:
-
-- Users
-- Accounts
-- ExpenseCategories
-- Income
-- Expenses
-- Budgets
-- BalanceHistory
-
-This script defines:
-
-- Primary keys
-- Foreign keys
-- Check constraints
-- Unique constraints
-- Account type constraints
-
-### 7.3 02_insert_sample_data.sql
-
-Inserts sample data into the database.
-
-The sample data includes:
-
-- 2 users
-- 4 accounts
-- 10 expense categories
-- 12 income records
-- 60 expense records
-- 28 budget records
-- 16 balance history records
-
-The sample data is designed to support financial reports for March and April 2026.
-
-### 7.4 03_indexes.sql
-
-Creates indexes to improve query performance.
-
-Indexes are created on frequently queried columns such as:
-
-- UserID
-- AccountID
-- CategoryID
-- IncomeDate
-- ExpenseDate
-- AccountType
-
-These indexes support faster reporting and filtering.
-
-### 7.5 04_views.sql
-
-Creates SQL views for reporting.
-
-Main views:
-
-- `vw_monthly_financial_summary`
-- `vw_category_wise_spending`
-- `vw_budget_status`
-- `vw_account_balance_summary`
-- `vw_transaction_history`
-
-These views simplify report generation and dashboard display.
-
-### 7.6 05_functions.sql
-
-Creates user-defined SQL functions.
-
-Main functions:
-
-- `fn_total_income`
-- `fn_total_expense`
-- `fn_net_savings`
-- `fn_budget_status`
-
-These functions are used to calculate financial metrics.
-
-### 7.7 06_procedures.sql
-
-Creates stored procedures for common operations.
-
-Main procedures:
-
-- `sp_add_income`
-- `sp_add_expense`
-- `sp_get_monthly_summary`
-- `sp_get_category_spending`
-- `sp_get_budget_status`
-- `sp_get_transaction_history`
-
-These procedures help organize business logic inside the database.
-
-### 7.8 07_triggers.sql
-
-Creates triggers for automatic account balance updates.
-
-Main triggers:
-
-- `trg_before_income_insert`
-- `trg_after_income_insert`
-- `trg_before_expense_insert`
-- `trg_after_expense_insert`
-
-Trigger functions:
-
-- Validate positive transaction amount.
-- Check account ownership.
-- Check sufficient balance before expense.
-- Automatically update account balance.
-- Insert balance changes into `BalanceHistory`.
-
-### 7.9 08_backup.sql
-
-Contains database backup and recovery instructions.
-
-It includes:
-
-- Checking current database
-- Checking table list
-- Checking record counts
-- Backup command guide
-- Restore command guide
-
-The actual backup is performed using `mysqldump` in Command Prompt or Terminal.
-
-Example backup command:
-
-```powershell
-"C:\Program Files\MySQL\MySQL Server 8.4\bin\mysqldump.exe" -u root -p personal_finance_db > "D:\Self study\Kì 2 - Năm 2\Database\final\Project\Personal Finance Management\personal_finance_backup.sql"
-```
-
----
-
-## 8. Service Files
-
-The `services/` folder is used to organize backend logic.
-
-### 8.1 services/db.py
-
-Creates and returns a MySQL database connection.
-
-Main function:
-
-- `get_connection()`
-
-This function is used by other service files to interact with the database.
-
-### 8.2 services/auth_service.py
-
-Handles user authentication logic.
-
-Planned functions:
-
-- Register user
-- Hash password
-- Verify login
-- Check existing email
-
-### 8.3 services/account_service.py
-
-Handles account-related operations.
-
-Planned functions:
-
-- Get user accounts
-- Add new account
-- Update account
-- Delete account
-- View balance history
-
-### 8.4 services/income_service.py
-
-Handles income-related operations.
-
-Planned functions:
-
-- Add income
-- View income records
-- Update income
-- Delete income
-
-### 8.5 services/expense_service.py
-
-Handles expense-related operations.
-
-Planned functions:
-
-- Add expense
-- View expense records
-- Update expense
-- Delete expense
-- Filter expenses by category or date
-
-### 8.6 services/budget_service.py
-
-Handles budget-related operations.
-
-Planned functions:
-
-- Add monthly budget
-- Update budget
-- View budget status
-- Detect over-budget categories
-
-### 8.7 services/report_service.py
-
-Handles reporting logic.
-
-Planned functions:
-
-- Monthly financial summary
-- Category-wise spending
-- Budget report
-- Transaction history
-- Dashboard data
-
----
-
-## 9. Templates
-
-The `templates/` folder stores HTML pages rendered by Flask.
-
-### 9.1 base.html
-
-The main layout template. Other pages extend this file.
-
-It contains:
-
-- Page header
-- Navigation bar
-- Flash message display
-- Main content block
-
-### 9.2 login.html
-
-Login page for users.
-
-Fields:
-
-- Email
-- Password
-
-### 9.3 register.html
-
-Registration page for new users.
-
-Fields:
-
-- Username
-- Email
-- Phone number
-- Password
-
-### 9.4 dashboard.html
-
-Main dashboard page after login.
-
-Planned dashboard content:
-
-- Total income
-- Total expenses
-- Net savings
-- Total balance
-- Recent transactions
-- Budget alerts
-
-### 9.5 accounts.html
-
-Page for managing financial accounts.
-
-Planned features:
-
-- View bank and cash accounts
-- Add new account
-- View account balance
-
-### 9.6 income.html
-
-Page for managing income records.
-
-Planned features:
-
-- Add income
-- View income list
-- Edit income
-- Delete income
-
-### 9.7 expenses.html
-
-Page for managing expense records.
-
-Planned features:
-
-- Add expense
-- View expense list
-- Filter expenses by category/date
-- Edit expense
-- Delete expense
-
-### 9.8 budgets.html
-
-Page for managing monthly budgets.
-
-Planned features:
-
-- Set budget by category
-- View budget status
-- Show warning or over-budget alerts
-
-### 9.9 reports.html
-
-Page for financial reports.
-
-Planned reports:
-
-- Monthly income and expense summary
-- Category-wise spending chart
-- Budget status table
-- Transaction history
-
----
-
-## 10. How to Run the Project
-
-### Step 1: Clone or Open the Project Folder
-
-Open the project folder in VS Code or another code editor.
-
-### Step 2: Install Python Dependencies
-
-Run:
+Test the database connection:
 
 ```bash
-pip install -r requirements.txt
+python3 test_connectdb.py
 ```
 
-### Step 3: Configure MySQL Connection
+Start Flask:
 
-Open `config.py` and update your MySQL password:
+```bash
+python3 app.py
+```
 
-```python
-DB_CONFIG = {
-    "host": "127.0.0.1",
-    "port": 3306,
-    "user": "root",
-    "password": "YOUR_MYSQL_PASSWORD",
-    "database": "personal_finance_db",
-    "charset": "utf8mb4"
+By default Flask listens on:
+
+```text
+http://127.0.0.1:5000
+```
+
+This is the internal backend address. In the HTTPS setup, users should access the app through Nginx at `https://localhost`.
+
+## How the App Works
+
+The application follows a simple server-rendered Flask pattern:
+
+```text
+Browser -> app.py route -> services/*.py -> MySQL -> Jinja template -> Browser
+```
+
+`app.py` defines routes such as `/login`, `/dashboard`, `/accounts`, `/income`, `/expenses`, `/budgets`, and `/reports`.
+
+The service layer holds database logic:
+
+- `auth_service.py`: register and authenticate users.
+- `account_service.py`: create, read, update, and delete accounts.
+- `income_service.py`: manage income records.
+- `expense_service.py`: manage expense records.
+- `budget_service.py`: manage monthly category budgets.
+- `report_service.py`: read report views.
+
+The database also contains business logic:
+
+- Stored procedures insert income and expenses.
+- Triggers automatically update account balances and write `BalanceHistory`.
+- Views prepare transaction history, budget status, monthly summary, and category spending reports.
+
+## HTTPS/TLS Deployment with Nginx
+
+The target deployment model is:
+
+```text
+Browser -> https://localhost:443 -> Nginx -> http://127.0.0.1:5000 -> Flask
+```
+
+Flask still runs locally on port `5000`. Nginx receives HTTPS traffic on port `443`, terminates TLS, applies hardening headers, and reverse proxies the request into Flask.
+
+### 1. Install Nginx and mkcert
+
+```bash
+sudo apt update
+sudo apt install nginx libnss3-tools mkcert
+```
+
+Check Nginx:
+
+```bash
+sudo systemctl status nginx
+```
+
+### 2. Create a Local Trusted Certificate
+
+```bash
+mkcert -install
+mkdir -p ~/certs/pfm
+cd ~/certs/pfm
+mkcert localhost 127.0.0.1 ::1
+```
+
+This creates files similar to:
+
+```text
+localhost+2.pem
+localhost+2-key.pem
+```
+
+The `.pem` file is the certificate. The `-key.pem` file is the private key and must not be committed.
+
+### 3. Install the Nginx Site
+
+Copy the example config:
+
+```bash
+sudo cp nginx/pfm.conf.example /etc/nginx/sites-available/pfm
+```
+
+Edit the certificate paths:
+
+```bash
+sudo nano /etc/nginx/sites-available/pfm
+```
+
+Replace `YOUR_USER` with your Linux username:
+
+```nginx
+ssl_certificate /home/YOUR_USER/certs/pfm/localhost+2.pem;
+ssl_certificate_key /home/YOUR_USER/certs/pfm/localhost+2-key.pem;
+```
+
+Enable the site:
+
+```bash
+sudo ln -s /etc/nginx/sites-available/pfm /etc/nginx/sites-enabled/pfm
+sudo rm -f /etc/nginx/sites-enabled/default
+sudo nginx -t
+sudo systemctl restart nginx
+```
+
+### 4. What the Nginx Config Does
+
+The port 80 block redirects plain HTTP to HTTPS:
+
+```nginx
+return 301 https://$host$request_uri;
+```
+
+The port 443 block enables HTTPS:
+
+```nginx
+listen 443 ssl http2;
+ssl_protocols TLSv1.2 TLSv1.3;
+```
+
+Only TLS 1.2 and TLS 1.3 are allowed. TLS 1.0, TLS 1.1, and old SSL versions are intentionally disabled.
+
+The reverse proxy rule sends traffic into Flask:
+
+```nginx
+location / {
+    proxy_pass http://127.0.0.1:5000;
 }
 ```
 
-### Step 4: Create the Database
+That line creates the backend half of the flow:
 
-Open MySQL Workbench and run SQL scripts in this order:
+```text
+Nginx -> http://127.0.0.1:5000 -> Flask
+```
 
-1. `00_create_database.sql`
-2. `01_create_tables.sql`
-3. `02_insert_sample_data.sql`
-4. `03_indexes.sql`
-5. `04_views.sql`
-6. `05_functions.sql`
-7. `06_procedures.sql`
-8. `07_triggers.sql`
-9. `08_backup.sql`
+## Security Testing
 
-The `08_backup.sql` file is optional for checking database status. The actual backup is done using `mysqldump`.
+All HTTPS tests should target `https://localhost`, not `http://127.0.0.1:5000`. Port `5000` bypasses Nginx and therefore bypasses the TLS layer.
 
-### Step 5: Run the Flask Application
+### Browser Verification
 
-Run:
+Open:
+
+```text
+https://localhost/login
+```
+
+The login page should load over HTTPS.
+
+### HTTP-to-HTTPS Redirect
 
 ```bash
-python app.py
+curl -I http://localhost/login
 ```
 
-Then open your browser:
+Expected result:
 
-- `http://127.0.0.1:5000`
-
----
-
-## 11. Demo Users
-
-The sample data includes two users:
-
-| User | Email | Note |
-|---|---|---|
-| Nguyen Duy Anh | duyanh@example.com | Sample user 1 |
-| Tran Minh Quan | minhquan@example.com | Sample user 2 |
-
-At the database stage, passwords are stored as placeholder hash strings. For real Flask login, new users should be created through the registration page so the password can be hashed correctly.
-
----
-
-## 12. Database Design Summary
-
-The database contains seven main tables:
-
-- Users
-- Accounts
-- ExpenseCategories
-- Income
-- Expenses
-- Budgets
-- BalanceHistory
-
-Main relationships:
-
-- Users 1 - N Accounts
-- Users 1 - N Income
-- Users 1 - N Expenses
-- Users 1 - N Budgets
-- Accounts 1 - N Income
-- Accounts 1 - N Expenses
-- Accounts 1 - N BalanceHistory
-- ExpenseCategories 1 - N Expenses
-- ExpenseCategories 1 - N Budgets
-
-The design separates users, accounts, transactions, categories, budgets, and balance history into different tables. This reduces data redundancy and improves consistency.
-
----
-
-## 13. Backup and Recovery
-
-### Backup
-
-Run this command in Command Prompt:
-
-```powershell
-"C:\Program Files\MySQL\MySQL Server 8.4\bin\mysqldump.exe" -u root -p personal_finance_db > "D:\Self study\Kì 2 - Năm 2\Database\final\Project\Personal Finance Management\personal_finance_backup.sql"
+```text
+HTTP/1.1 301 Moved Permanently
+Location: https://localhost/login
 ```
 
-### Restore
+### Security Headers
 
-Run:
-
-```powershell
-"C:\Program Files\MySQL\MySQL Server 8.4\bin\mysql.exe" -u root -p personal_finance_db < "D:\Self study\Kì 2 - Năm 2\Database\final\Project\Personal Finance Management\personal_finance_backup.sql"
+```bash
+curl -I https://localhost/login
 ```
 
----
+Expected headers include:
 
-## 14. Current Project Status
+```text
+Strict-Transport-Security
+X-Frame-Options
+X-Content-Type-Options
+Referrer-Policy
+Content-Security-Policy
+```
 
-### Completed
+These mitigate SSL stripping, clickjacking, MIME sniffing, and overly permissive resource loading.
 
-- Database design
-- ERD and relational schema
-- MySQL database creation
-- Sample data insertion
-- Indexes
-- Views
-- Functions
-- Stored procedures
-- Triggers
-- Backup command
-- Basic Flask structure
-- Initial register/login page rendering
+### TLS 1.2 and Cipher Test
 
-### In Progress
+```bash
+openssl s_client -connect localhost:443 -tls1_2
+```
 
-- Flask authentication
-- Dashboard UI
-- Account management page
-- Income and expense management pages
-- Budget management page
-- Reports and charts
+Expected evidence:
 
-### Planned Improvements
+```text
+Protocol  : TLSv1.2
+Cipher    : ECDHE-RSA-AES256-GCM-SHA384
+```
 
-- Improve web UI design
-- Add dashboard cards
-- Add expense and income CRUD
-- Add charts using Chart.js
-- Add budget warning display
-- Add better validation and error messages
-- Add final report screenshots and demo video
+`ECDHE` provides Perfect Forward Secrecy, and `AES256-GCM` is a modern authenticated encryption mode.
 
----
+### TLS 1.0 Rejection
 
-## 15. Future Work
+```bash
+openssl s_client -connect localhost:443 -tls1
+```
 
-Future improvements may include:
+Expected result: the handshake fails or no cipher is negotiated. This proves old TLS is disabled.
 
-- Mobile application version
-- Real banking API integration
-- Multi-currency support
-- Predictive spending analysis
-- Email or SMS budget alerts
-- AI-based financial advice
-- Export reports to PDF or Excel
+### Wireshark Verification
 
----
+Because this project runs on `localhost`, traffic does not leave the machine through Wi-Fi or Ethernet. It travels through the loopback interface:
 
-## 16. Conclusion
+```text
+127.0.0.1 / ::1 / localhost
+```
 
-This project demonstrates how a relational database and a Flask web application can be combined to build a practical personal finance management system. The database supports structured financial data storage, automatic balance tracking, budget monitoring, and financial reporting. The Flask web application provides a user-friendly interface for interacting with the system through a browser.
+In Wireshark:
+
+1. Start capture on the loopback interface (`lo`, `Loopback`, or `any`).
+2. Use the display filter:
+
+```text
+tcp.port == 443
+```
+
+`443` is the default HTTPS port. The filter shows both directions of the browser-to-Nginx TLS connection.
+
+Open:
+
+```text
+https://localhost/login
+```
+
+Expected packets:
+
+```text
+Client Hello
+Server Hello
+Application Data
+```
+
+`Client Hello` and `Server Hello` prove a TLS handshake occurred. `Application Data` means the HTTP payload is now encrypted inside TLS.
+
+## Risk Reduction
+
+| Threat | Mitigation in this project |
+| --- | --- |
+| Man-in-the-Middle | HTTPS encrypts browser-to-server traffic. |
+| Downgrade attack | Nginx only allows TLS 1.2 and TLS 1.3. |
+| SSL stripping | HTTP redirects to HTTPS and HSTS is enabled. |
+| Clickjacking | `X-Frame-Options: DENY` and CSP `frame-ancestors 'none'`. |
+| MIME sniffing | `X-Content-Type-Options: nosniff`. |
+| Cookie theft via JavaScript | Flask session cookie uses `HttpOnly`. |
+| Session over HTTP | Flask session cookie uses `Secure` when HTTPS is enabled. |
+
+## Production Notes
+
+This repo is configured for a local lab. For production:
+
+- Use a public CA certificate such as Let's Encrypt.
+- Use a real domain instead of `localhost`.
+- Do not run Flask with `debug=True`.
+- Run Flask behind a WSGI server such as Gunicorn or uWSGI.
+- Keep `.env`, private keys, certificates, database dumps, and reports out of Git.

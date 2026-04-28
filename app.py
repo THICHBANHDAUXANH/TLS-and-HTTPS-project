@@ -56,8 +56,13 @@ from functools import wraps
 # Import các thành phần chính của Flask
 from flask import Flask, render_template, redirect, url_for, session, request, flash
 
-# SECRET_KEY dùng cho session
-from config import SECRET_KEY
+# SECRET_KEY và session flags dùng cho session/cookie
+from config import (
+    SECRET_KEY,
+    SESSION_COOKIE_SECURE,
+    SESSION_COOKIE_HTTPONLY,
+    SESSION_COOKIE_SAMESITE
+)
 
 # Import các hàm xử lý authentication
 from services.auth_service import register_user, authenticate_user
@@ -68,6 +73,11 @@ from services.db import get_connection
 
 # Tạo Flask app
 app = Flask(__name__)
+app.config.update(
+    SESSION_COOKIE_SECURE=SESSION_COOKIE_SECURE,
+    SESSION_COOKIE_HTTPONLY=SESSION_COOKIE_HTTPONLY,
+    SESSION_COOKIE_SAMESITE=SESSION_COOKIE_SAMESITE,
+)
 
 # Secret key dùng để Flask bảo vệ session/cookie
 app.secret_key = SECRET_KEY
