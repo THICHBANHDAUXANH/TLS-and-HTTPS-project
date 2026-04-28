@@ -400,12 +400,3 @@ Application Data
 | Cookie theft via JavaScript | Flask session cookie uses `HttpOnly`. |
 | Session over HTTP | Flask session cookie uses `Secure` when HTTPS is enabled. |
 
-## Production Notes
-
-This repo is configured for a local lab. For production:
-
-- Use a public CA certificate such as Let's Encrypt.
-- Use a real domain instead of `localhost`.
-- Do not run Flask with `debug=True`.
-- Run Flask behind a WSGI server such as Gunicorn or uWSGI.
-- Keep `.env`, private keys, certificates, database dumps, and reports out of Git.
